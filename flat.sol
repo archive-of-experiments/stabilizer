@@ -214,7 +214,6 @@ interface IFreedomSwaps {
 // We separate money from state criminals like religion has been separated from state.
 // We foster ever emerging architectures of freedom by rewarding those who help themselves and others to be free.
 
-
 pragma solidity 0.8.19;
 
 
@@ -233,7 +232,7 @@ contract CostAverageIntoFreedom {
         uint256 input; // contains the amount of Matic deposited 
         address token; // e.g. 0xb841A4f979F9510760ecf60512e038656E68f459 
         uint256 swapped; // contains the total amount of Matic already swapped 
-        uint256 interval; // e.g. 36000 (assuming a block-time of 2 seconds this would be around 5 hours)
+        uint256 minInterval; // e.g. 36000 (assuming a block-time of 2 seconds this would be around 5 hours)
         uint256 lastPurchase; // block number at last purchase or initial
         uint256 perPurchaseAmount; // defines how much Matic goes into each purchase
         uint256 claimable; // represents the amount the Freedom Lover can claim
@@ -249,13 +248,13 @@ contract CostAverageIntoFreedom {
         swapRouter = ISwapRouter(SWAP_ROUTER);
     }
 
-    function deposit(uint256 interval, uint256 perPurchaseAmount, address token) public payable {
+    function deposit(uint256 minInterval, uint256 perPurchaseAmount, address token) public payable {
         if ((msg.value % perPurchaseAmount) != 0) { revert CheckInput(); }
-        if (deposits[msg.sender].input == 0) {
-            deposits[msg.sender] = IDeposit(msg.value, token, 0, interval, 0, perPurchaseAmount, 0);
+        if (deposits[msg.sender].input - deposits[msg.sender].swapped == 0 && deposits[msg.sender].claimable == 0) {
+            deposits[msg.sender] = IDeposit(msg.value, token, 0, minInterval, 0, perPurchaseAmount, 0);
         } else if(token == deposits[msg.sender].token) {
             deposits[msg.sender].input += msg.value;
-            deposits[msg.sender].interval = interval;
+            deposits[msg.sender].minInterval = minInterval;
             deposits[msg.sender].perPurchaseAmount = perPurchaseAmount;
         } else {
             revert CheckInput();
@@ -264,10 +263,11 @@ contract CostAverageIntoFreedom {
 
     function trigger(uint24 poolFee, uint24 slippage) public {
         if (deposits[msg.sender].input >= deposits[msg.sender].swapped + deposits[msg.sender].perPurchaseAmount) {
-            if (block.number > deposits[msg.sender].lastPurchase + deposits[msg.sender].interval) {
-                IFreedomSwaps(FREEDOMSWAPS).swapBaseCurrency{value: deposits[msg.sender].perPurchaseAmount}(MATIC, deposits[msg.sender].token, poolFee, slippage);
+            if (block.number > deposits[msg.sender].lastPurchase + deposits[msg.sender].minInterval) {
+                uint256 amountOut = IFreedomSwaps(FREEDOMSWAPS).swapBaseCurrency{value: deposits[msg.sender].perPurchaseAmount}(MATIC, deposits[msg.sender].token, poolFee, slippage);
                 deposits[msg.sender].lastPurchase = block.number;
                 deposits[msg.sender].swapped += deposits[msg.sender].perPurchaseAmount;
+                deposits[msg.sender].claimable += amountOut;
             } else {
                 revert Wait();
             }
