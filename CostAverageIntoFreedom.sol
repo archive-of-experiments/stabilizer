@@ -11,9 +11,9 @@
 // We foster ever emerging architectures of freedom by rewarding those who help themselves and others to be free.
 
 pragma solidity 0.8.19;
-
 import "https://raw.githubusercontent.com/moniquebaumann/freedomswaps/v0.0.1/IFreedomSwaps.sol";
 import "https://raw.githubusercontent.com/Uniswap/v3-periphery/main/contracts/interfaces/ISwapRouter.sol";
+import "https://raw.githubusercontent.com/Uniswap/solidity-lib/master/contracts/libraries/TransferHelper.sol";
 import "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/v4.9.4/contracts/token/ERC20/IERC20.sol";
 
 
@@ -22,9 +22,7 @@ contract CostAverageIntoFreedom {
     address private constant MATIC          = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
     address private constant FREEDOMSWAPS   = 0xA70f5023801F06A6a4C04695E794cf6e2ecCb34F;
     address private constant SWAP_ROUTER    = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
-
     mapping(address => IDeposit) public deposits;
-
     struct IDeposit {
         uint256 input; // contains the amount of Matic deposited 
         address token; // e.g. 0xb841A4f979F9510760ecf60512e038656E68f459 
@@ -34,7 +32,6 @@ contract CostAverageIntoFreedom {
         uint256 perPurchaseAmount; // defines how much Matic goes into each purchase
         uint256 claimable; // represents the amount the Freedom Lover can claim
     }
-
     ISwapRouter public immutable swapRouter;
 
     error Wait();
@@ -75,6 +72,9 @@ contract CostAverageIntoFreedom {
 
     function claim() public {
         if (deposits[msg.sender].claimable == 0) { revert CheckInput(); }
+        if (IERC20(MATIC).allowance(address(this), msg.sender) < deposits[msg.sender].claimable) {
+            TransferHelper.safeApprove(deposits[msg.sender].token, msg.sender, deposits[msg.sender].claimable);
+        }
         IERC20(deposits[msg.sender].token).transferFrom(address(this), msg.sender, deposits[msg.sender].claimable);        
         deposits[msg.sender].claimable = 0;
     }
