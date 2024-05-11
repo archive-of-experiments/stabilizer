@@ -80,6 +80,60 @@ interface IERC20 {
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
 }
 
+// File: https://raw.githubusercontent.com/Uniswap/solidity-lib/master/contracts/libraries/TransferHelper.sol
+
+
+
+pragma solidity >=0.6.0;
+
+// helper methods for interacting with ERC20 tokens and sending ETH that do not consistently return true/false
+library TransferHelper {
+    function safeApprove(
+        address token,
+        address to,
+        uint256 value
+    ) internal {
+        // bytes4(keccak256(bytes('approve(address,uint256)')));
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x095ea7b3, to, value));
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            'TransferHelper::safeApprove: approve failed'
+        );
+    }
+
+    function safeTransfer(
+        address token,
+        address to,
+        uint256 value
+    ) internal {
+        // bytes4(keccak256(bytes('transfer(address,uint256)')));
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0xa9059cbb, to, value));
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            'TransferHelper::safeTransfer: transfer failed'
+        );
+    }
+
+    function safeTransferFrom(
+        address token,
+        address from,
+        address to,
+        uint256 value
+    ) internal {
+        // bytes4(keccak256(bytes('transferFrom(address,address,uint256)')));
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x23b872dd, from, to, value));
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            'TransferHelper::transferFrom: transferFrom failed'
+        );
+    }
+
+    function safeTransferETH(address to, uint256 value) internal {
+        (bool success, ) = to.call{value: value}(new bytes(0));
+        require(success, 'TransferHelper::safeTransferETH: ETH transfer failed');
+    }
+}
+
 // File: @uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.sol
 
 
@@ -220,14 +274,13 @@ pragma solidity 0.8.19;
 
 
 
+
 contract CostAverageIntoFreedom {
 
     address private constant MATIC          = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
     address private constant FREEDOMSWAPS   = 0xA70f5023801F06A6a4C04695E794cf6e2ecCb34F;
     address private constant SWAP_ROUTER    = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
-
     mapping(address => IDeposit) public deposits;
-
     struct IDeposit {
         uint256 input; // contains the amount of Matic deposited 
         address token; // e.g. 0xb841A4f979F9510760ecf60512e038656E68f459 
@@ -237,7 +290,6 @@ contract CostAverageIntoFreedom {
         uint256 perPurchaseAmount; // defines how much Matic goes into each purchase
         uint256 claimable; // represents the amount the Freedom Lover can claim
     }
-
     ISwapRouter public immutable swapRouter;
 
     error Wait();
@@ -278,6 +330,9 @@ contract CostAverageIntoFreedom {
 
     function claim() public {
         if (deposits[msg.sender].claimable == 0) { revert CheckInput(); }
+        if (IERC20(MATIC).allowance(address(this), msg.sender) < deposits[msg.sender].claimable) {
+            TransferHelper.safeApprove(deposits[msg.sender].token, msg.sender, deposits[msg.sender].claimable);
+        }
         IERC20(deposits[msg.sender].token).transferFrom(address(this), msg.sender, deposits[msg.sender].claimable);        
         deposits[msg.sender].claimable = 0;
     }
