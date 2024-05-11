@@ -1,11 +1,6 @@
 [
 	{
 		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"inputs": [],
 		"name": "CheckInput",
 		"type": "error"
 	},
@@ -18,13 +13,6 @@
 		"inputs": [],
 		"name": "Wait",
 		"type": "error"
-	},
-	{
-		"inputs": [],
-		"name": "claim",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
 	},
 	{
 		"inputs": [
@@ -41,6 +29,11 @@
 			{
 				"internalType": "address",
 				"name": "token",
+				"type": "address"
+			},
+			{
+				"internalType": "address payable",
+				"name": "recipient",
 				"type": "address"
 			}
 		],
@@ -90,21 +83,8 @@
 				"type": "uint256"
 			},
 			{
-				"internalType": "uint256",
-				"name": "claimable",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "swapRouter",
-		"outputs": [
-			{
-				"internalType": "contract ISwapRouter",
-				"name": "",
+				"internalType": "address payable",
+				"name": "recipient",
 				"type": "address"
 			}
 		],
