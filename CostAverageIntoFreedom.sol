@@ -72,7 +72,7 @@ contract CostAverageIntoFreedom {
 
     function claim() public {
         if (deposits[msg.sender].claimable == 0) { revert CheckInput(); }
-        if (IERC20(MATIC).allowance(address(this), msg.sender) < deposits[msg.sender].claimable) {
+        if (IERC20(deposits[msg.sender].token).allowance(address(this), msg.sender) < deposits[msg.sender].claimable) {
             TransferHelper.safeApprove(deposits[msg.sender].token, msg.sender, deposits[msg.sender].claimable);
         }
         IERC20(deposits[msg.sender].token).transferFrom(address(this), msg.sender, deposits[msg.sender].claimable);        
