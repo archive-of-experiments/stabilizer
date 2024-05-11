@@ -1,5 +1,5 @@
 # Stabilizer
-Stabilize prices by buying low and selling high.
+Stabilize prices by buying low and selling high supported by the [Cost Average Into Freedom Smart Contract](https://polygonscan.com/address/0x6075985C3F02DAb1E95b1C7Dd6665D52A2608EFF).
 
 ## About Us 
 We are [Friends of Satoshi](https://github.com/moniquebaumann/friends-of-satoshi). 
