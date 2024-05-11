@@ -11,16 +11,6 @@
 	},
 	{
 		"inputs": [],
-		"name": "DepositAlreadySwapped",
-		"type": "error"
-	},
-	{
-		"inputs": [],
-		"name": "Wait",
-		"type": "error"
-	},
-	{
-		"inputs": [],
 		"name": "claim",
 		"outputs": [],
 		"stateMutability": "nonpayable",
@@ -30,7 +20,7 @@
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "interval",
+				"name": "minInterval",
 				"type": "uint256"
 			},
 			{
@@ -48,6 +38,34 @@
 		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "DepositAlreadySwapped",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint24",
+				"name": "poolFee",
+				"type": "uint24"
+			},
+			{
+				"internalType": "uint24",
+				"name": "slippage",
+				"type": "uint24"
+			}
+		],
+		"name": "trigger",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "Wait",
+		"type": "error"
 	},
 	{
 		"inputs": [
@@ -76,7 +94,7 @@
 			},
 			{
 				"internalType": "uint256",
-				"name": "interval",
+				"name": "minInterval",
 				"type": "uint256"
 			},
 			{
@@ -109,24 +127,6 @@
 			}
 		],
 		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint24",
-				"name": "poolFee",
-				"type": "uint24"
-			},
-			{
-				"internalType": "uint24",
-				"name": "slippage",
-				"type": "uint24"
-			}
-		],
-		"name": "trigger",
-		"outputs": [],
-		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]
